@@ -1,0 +1,13 @@
+INFO  Job started: ISE_Editing_Session - sitecore\Admin
+INFO  Cleanup of resource items is started for 'master' database.
+INFO  Resource item {083CC92D-03B7-46FB-BCE2-1C9DDAEB89DE} is modified. 'en' version has different set of fields ({B5E02AD9-D56F-4C41-A065-A133DB87BDEB}). Name: 'Insert Rules'. Template: {A87A00B1-E6DB-45AB-8B54-636FEC3B5523}
+INFO  Job started: Sitecore.ContentSearch.SolrProvider.Agents.IndexingStateSwitcher
+INFO  Job ended: Sitecore.ContentSearch.SolrProvider.Agents.IndexingStateSwitcher
+INFO  Resource item {414AAF16-ACB7-43A9-A72E-C8C192154F78} is modified. Value of {F7D48A55-2158-4F02-9356-756654404F73} field is changed in 'en' version. Name: 'Standard Comment Template'. Template: {AB86861A-6030-46C5-B394-E8F99E8B87DB}
+INFO  Resource item {2564EFC3-B5F7-427C-AE08-BC9A907CD125} is modified. Value of {B1A94FF0-6897-47C0-9C51-AA6ACB80B1F0} field is changed in 'en' version. Name: 'Find overwritten resource items'. Template: {DD22F1B3-BD87-4DB2-9E7D-F7A496888D43}
+INFO  Job started: Index_Update_IndexName=sitecore_master_index
+INFO  Job ended: Index_Update_IndexName=sitecore_master_index
+INFO  Resource item {BD085463-EEB5-4BB8-8473-078943D7EFD8} is modified. 'nl-NL' version has different set of fields ({577F1689-7DE4-4AD2-A15F-7FDC1759285F}, {B5E02AD9-D56F-4C41-A065-A133DB87BDEB}). Name: 'Blue'. Template: {1930BBEB-7805-471A-A3BE-4858AC7CF696}
+INFO  Resource item {2100BCC2-4746-4E97-9A61-E70716AC47A4} is modified. Value of {B1A94FF0-6897-47C0-9C51-AA6ACB80B1F0} field is changed in 'en' version. Name: 'Simple Content Warning'. Template: {DD22F1B3-BD87-4DB2-9E7D-F7A496888D43}
+INFO  Cleanup of resource items is finished for 'master' database. Removed: 3 item(s).
+INFO  Job ended: ISE_Editing_Session - sitecore\Admin

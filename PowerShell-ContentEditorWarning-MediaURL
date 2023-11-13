@@ -1,0 +1,42 @@
+function Get-MediaUrlOptions() {
+    $siteContext = [Sitecore.Sites.SiteContext]::GetSite("playwebsite");
+    $muobj = New-UsingBlock(New-Object Sitecore.Sites.SiteContextSwitcher $siteContext) {
+       New-Object Sitecore.Links.UrlBuilders.MediaUrlBuilderOptions
+    }
+    $muobj.AlwaysIncludeServerUrl = 1
+    $muobj.UseItemPath = 0
+    return $muobj
+}
+function Get-MediaUrl($item, $muo) {
+    $siteContext = [Sitecore.Sites.SiteContext]::GetSite("playwebsite");
+    $result = New-UsingBlock(New-Object Sitecore.Sites.SiteContextSwitcher $siteContext) {
+       [Sitecore.Resources.Media.MediaManager]::GetMediaUrl($item,$muo)
+    }
+    return $result
+}
+
+$item = Get-Item -Path .
+[Sitecore.Links.UrlBuilders.MediaUrlBuilderOptions]$muo = Get-MediaUrlOptions
+$muo.UseItemPath = 0
+$muo.AlwaysIncludeServerUrl = 1
+$guidmedia =   Get-MediaUrl $item $muo
+$muo.UseItemPath = 1
+$nicemedia =   Get-MediaUrl $item $muo
+$muo.AlwaysIncludeServerUrl = 0
+$nicemediaPath =  Get-MediaUrl $item $muo
+$edgemediaPath = $nicemediaPath.Substring(2)
+
+#Adjust to the desired environment, note: we build the likely url, if media is published to edge,
+$edgemedia = "https://edge.sitecorecloud.io/uxbee-playsummitd0101-demo-f1a0$edgemediaPath"
+
+$icon = $PSScript.Appearance.Icon
+$iconUrl = [Sitecore.Resources.Images]::GetThemedImageSource($icon)
+$title = "Media URL"
+$text = "This item has internal URL $nicemedia<br>Or without path: $guidmedia<br>Edge url <a href='$edgemedia' target='_blank'>$edgemedia</a>"
+
+$warning = $pipelineArgs.Add()
+$warning.Title = $title
+$warning.Text = $text
+$warning.Icon = "/sitecore/shell/themes/standard/Images/information.png"
+
+$warning.HideFields = $false

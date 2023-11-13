@@ -1,4 +1,5 @@
 function Get-MediaUrlOptions() {
+    #Adjust to the desired website, or use website for default.
     $siteContext = [Sitecore.Sites.SiteContext]::GetSite("playwebsite");
     $muobj = New-UsingBlock(New-Object Sitecore.Sites.SiteContextSwitcher $siteContext) {
        New-Object Sitecore.Links.UrlBuilders.MediaUrlBuilderOptions

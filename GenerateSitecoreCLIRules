@@ -1,0 +1,123 @@
+function CheckMediaInUse($mediaitem, $websiteroot)
+{
+    $mediafromwebdb = Get-Item -Path "web:" -ID $mediaitem.ID -ErrorAction SilentlyContinue -ErrorVariable getfromwebError
+    if ($getfromwebError.Count -gt 0 -and ($getfromwebError[0].FullyQualifiedErrorId.Contains("ItemNotFound"))) {
+         Write-Host "not in web database ignore"
+        return $false
+    }
+    $referrers = Get-ItemReferrer -Item $mediafromwebdb
+    if ($referrers -eq $null) {
+        Write-Host "no reffs ignore"
+        return $false
+    }
+    $retvalue = $false
+    $referrers | ForEach-Object {
+        if ($retvalue -eq $false -and $_.FullPath.StartsWith($websiteroot)) {
+            #Write-Host "-REF test Item path: " $_.FullPath
+            $layout = Get-Layout -FinalLayout -Item $_
+            if ($layout -ne $null) {
+                #Write-Host "reference with layout found"
+                $retvalue = $true
+                return
+            }
+            if ($_.Name -eq "News Banner") {
+                 $retvalue = $true
+                return
+            }
+            $componentreferrers = Get-ItemReferrer -Item $_
+            if ($componentreferrers -ne $null) {
+                $componentreferrers | ForEach-Object {
+                   #Write-Host "--component reference Item path: " $_.FullPath
+                    $complayout = Get-Layout -FinalLayout -Item $_
+                    if ($complayout -ne $null) {
+                        #Write-Host "component reference with layout found"
+                        $retvalue = $true
+                        return
+                    }
+                }
+            }
+            #Adjust rules depend on your solution.
+            if ($_.TemplateName -eq "	Gallery Image") {
+                #Responsive Image may be part of a gallery or slider check a extra level
+                $parentreftitem = $_.Parent
+                #Write-Host "--Parent reference Item : " $parentreftitem
+                $subreferrers = Get-ItemReferrer -Item $parentreftitem
+                if ($subreferrers -ne $null) {
+                    $subreferrers | ForEach-Object {
+                       #Write-Host "--Sub reference Item path: " $_.FullPath
+                        $sublayout = Get-Layout -FinalLayout -Item $_
+                        if ($sublayout -ne $null) {
+                            #Write-Host "sub reference with layout found"
+                            $retvalue = $true
+                            return
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if ($retvalue -eq $false) {
+        Write-Host "No references with layout found"
+    } else {
+        #Write-Host "A references with layout found"
+    }
+    return $retvalue
+}
+
+$global:sizeToMigrate=0
+$global:sizeNotMigrate=0
+$global:pathsToExclude=@()
+$global:serialisationBasePath=""
+function ProcessChildren($path, $websiteroot)
+{
+    $childItems = Get-Item master: -Query $path"/*"
+    $childItems | ForEach-Object {
+        #Write-Host "template : " $_.TemplateName
+        if ($_.TemplateName -eq "Node" -or $_.TemplateName -eq "Folder") {
+            Write-Host "Node or Folder template found please change to Media folder  $($_.FullPath)"
+            exit;
+        }
+        $migrate = $true;
+        if ($_.TemplateName -ne "Media folder") {
+            $migrate = CheckMediaInUse $_  $websiteroot
+            $size = [Int]($_["Size"])
+            if ( $size -gt 50000000) {
+                Write-Host "TO big for XM CLOUD Edge: $size"
+                $migrate = $false;
+            }
+            if ($migrate -eq $false) {
+                Write-Host "Exclude Item path: $($_.FullPath)"
+                 $global:sizeNotMigrate+=$size
+                 $global:pathsToExclude += $_.FullPath.Replace( $global:serialisationBasePath, "")
+            } else {
+               $global:sizeToMigrate+=$size 
+            }
+        }
+        if ($migrate -eq $true) {
+            #note media's should be in a map, media below media can ignored, if a media is marked as not migrated the childeren are also ignored.
+            ProcessChildren $_.FullPath $websiteroot
+        }
+    }
+}
+
+function GenerateSerialisationRules($path, $websiteroot)
+{
+    $global:serialisationBasePath = $path
+    ProcessChildren $path  $websiteroot
+    
+    $global:pathsToExclude | ForEach-Object {
+    Write-Host "{"
+    Write-Host """path"": ""$_"","
+    Write-Host """scope"": ""ignored"""
+    Write-Host "},"
+    }
+}
+
+#iterate through media and check if there are references within the site content folder
+GenerateSerialisationRules "/sitecore/media library/Project/SiteX" "/sitecore/content/myTenant/SiteX"
+
+Write-Host "Found $($sizeToMigrate.ToString("N0")) media bytes to migrate ignore $($sizeNotMigrate.ToString("N0"))"
+
+
+
+

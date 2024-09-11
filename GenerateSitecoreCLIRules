@@ -1,3 +1,5 @@
+#Example of getting Sitecore CLI serialisation rules to ignore media that is not used in a specific website, check if media have a reference that is actual on a page with a layout in the web database (Sitecore experience platform)
+
 function CheckMediaInUse($mediaitem, $websiteroot)
 {
     $mediafromwebdb = Get-Item -Path "web:" -ID $mediaitem.ID -ErrorAction SilentlyContinue -ErrorVariable getfromwebError

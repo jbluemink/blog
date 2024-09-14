@@ -39,8 +39,8 @@ function CheckMediaInUse($mediaitem, $websiteroot)
                 }
             }
             #Adjust rules depend on your solution.
-            if ($_.TemplateName -eq "	Gallery Image") {
-                #Responsive Image may be part of a gallery or slider check a extra level
+            if ($_.TemplateName -eq "Gallery Image") {
+                #Gallery Image may be part of a gallery or slider check a extra level
                 $parentreftitem = $_.Parent
                 #Write-Host "--Parent reference Item : " $parentreftitem
                 $subreferrers = Get-ItemReferrer -Item $parentreftitem

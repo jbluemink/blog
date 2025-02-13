@@ -1,0 +1,35 @@
+function foundAndRenameDuplicates($path)
+{
+    $rootItem = Get-Item -Path "master:$path"
+    $duplicates = $rootItem.Axes.GetDescendants() | Initialize-Item |
+    Group-Object { $_.ItemPath } |
+    Where-Object { $_.Count -gt 1 } |
+    Sort-Object -Property Count -Descending |
+    Select-Object -Property Count, Name
+
+    if ($duplicates) {
+        Write-Host "Duplicates found this is not allowed for item serialisation"
+        $duplicates | ForEach-Object {
+            Write-Host $_.Count $_.Name
+            $dups = Get-Item -AmbiguousPaths -Path "master:$($_.Name)"
+            $count=0
+            $dups | ForEach-Object {
+                $count++;
+                if ($count -ne 1) {
+                    $newname = $_.Name
+                    $newname += "_R$count"
+                    if(Test-Path -Path "master:$($_.FullPath)_$count") {
+                        $newname = $_.ID.Guid
+                    }
+                    $_.Editing.BeginEdit()
+                    $_.Name = $newname
+                    $_.Editing.EndEdit()
+                    Write-Host "Item renamed to $newname";
+                    Publish-Item $_ -Target "web" -PublishMode SingleItem
+                }
+            }
+        }
+    }
+}
+
+foundAndRenameDuplicates "/sitecore/media library/Files"
